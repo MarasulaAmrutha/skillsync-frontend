@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Ensure this matches your backend's server.port in application.properties
-const API_URL = 'http://localhost:8080/api/feedback'; // Updated to match backend port
+const API_URL = 'https://skillsync-backend-4.onrender.com/api/feedback'; // Updated to match backend port
 
 const FeedbackService = {
   submitFeedback: (feedback) => {
