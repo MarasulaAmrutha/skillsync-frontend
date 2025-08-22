@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import FeedbackForm from './components/FeedbackForm';
 import FeedbackList from './components/FeedbackList';
 import FeedbackCharts from './components/FeedbackCharts';
@@ -22,7 +22,15 @@ const App = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  const fetchAllFeedback = async () => {
+  const updateChartData = (data) => {
+    const groupedRatings = [1, 2, 3, 4, 5].map(value => ({
+      rating: `${value} ★`,
+      count: data.filter(item => item.rating === value).length
+    }));
+    setRatingCounts(groupedRatings);
+  };
+
+  const fetchAllFeedback = useCallback(async () => {
     try {
       const res = await FeedbackService.getAllFeedback();
       setFeedbackList(res.data);
@@ -30,7 +38,7 @@ const App = () => {
     } catch (err) {
       console.error("Error fetching all feedback:", err.response ? err.response.data : err.message);
     }
-  };
+  }, []);
 
   const fetchFilteredFeedback = async () => {
     try {
@@ -88,21 +96,12 @@ const App = () => {
     }
   };
 
-  const updateChartData = (data) => {
-    const groupedRatings = [1, 2, 3, 4, 5].map(value => ({
-      rating: `${value} ★`,
-      count: data.filter(item => item.rating === value).length
-    }));
-    setRatingCounts(groupedRatings);
-  };
-
   useEffect(() => {
     fetchAllFeedback(); // Initial load of all feedback
-  }, []);
+  }, [fetchAllFeedback]);
 
   useEffect(() => {
-    // Re-fetch analytics whenever filterCourseId changes
-    fetchAnalytics(filterCourseId);
+    fetchAnalytics(filterCourseId); // Re-fetch analytics when course ID changes
   }, [filterCourseId]);
 
   const handleFilterChange = () => {
@@ -256,15 +255,15 @@ const App = () => {
         avgContentRating={avgContentRating}
         avgTrainerRating={avgTrainerRating}
         feedbackCount={feedbackCount}
-        courseId={filterCourseId} // Pass the currently filtered course ID to charts
+        courseId={filterCourseId}
       />
 
-      {/* Feedback List (Comment Management & Tagging UI is within FeedbackCard) */}
+      {/* Feedback List */}
       <h2 style={sectionTitleStyle}>All Feedback Entries</h2>
       <FeedbackList
         feedbackList={feedbackList}
-        onUpdateFeedback={handleFilterChange} // Refresh list after update/delete
-        onDeleteFeedback={handleFilterChange} // Refresh list after update/delete
+        onUpdateFeedback={handleFilterChange}
+        onDeleteFeedback={handleFilterChange}
       />
     </div>
   );
